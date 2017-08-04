@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -18,74 +19,91 @@ public class Data {
 
     public static final String SPLIT_MARK = "##";
 
-    private static List<String> mLines;
+    private static final String mDataPath = new File("").getAbsolutePath() + File.separator + "data.txt";
 
     static {
-        try {
-            String dataPath = new File("").getAbsolutePath() + File.separator + "data.txt";
-            File dataFile = new File(dataPath);
-            if (!dataFile.exists()) {
-                dataFile.getParentFile().mkdirs();
+        File dataFile = new File(mDataPath);
+        if (!dataFile.exists()) {
+            dataFile.getParentFile().mkdirs();
+            try {
                 dataFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
+    }
 
-            mLines = Files.readAllLines(Paths.get(dataPath));
+    public static synchronized List<String> readAllLines() {
+        try {
+            return Files.readAllLines(Paths.get(mDataPath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
 
-            if (null == mLines) {
-                mLines = new ArrayList<>();
-            }
+    public static synchronized void write(Line line) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(mDataPath), true));
+            bw.write("\n" + line.toString());
+            bw.flush();
+            bw.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static ChatInfo processData(String input) {
+    static class Line {
 
-        Pair<Integer, Line> goodOut = null;
+        private String[] mDataPart = new String[]{
+                UUID.randomUUID().toString(), "", "", "0"
+        };
 
-        for (String line : mLines) {
-            Line lineData = new Line(line);
-            String ask = lineData.getAsk();
-            int score = getSimilarScore(input, ask);
-            if (null == goodOut) {
-                goodOut = new Pair<>(score, lineData);
-            } else {
-                if (score > goodOut.getKey()) {
-                    goodOut = new Pair<>(score, lineData);
-                }
+        public Line(String mline) {
+            String[] dataPart = mline.split(SPLIT_MARK);
+            for (int i = 0; i < dataPart.length; i++) {
+                mDataPart[i] = dataPart[i];
             }
         }
 
-        ChatInfo chatInfo = new ChatInfo();
-        chatInfo.setMine(false);
-        chatInfo.setNick("Robot");
-        chatInfo.setContent(null == goodOut ? "sorry, i dont know…" : goodOut.getValue().getAnswer());
-        return chatInfo;
-    }
-
-    private static int getSimilarScore(String input, String data) {
-        return 0;
-    }
-
-
-    private static class Line {
-
-        private String[] mDataPart;
-
-        public Line(String mline) {
-            mDataPart = mline.split(SPLIT_MARK);
+        public Line() {
         }
 
-        private long getId() {
-            return Long.valueOf(mDataPart[0]);
+        private String getId() {
+            return mDataPart[0];
         }
 
         public String getAsk() {
             return mDataPart[1];
         }
 
+        public void setAsk(String ask) {
+            mDataPart[1] = ask;
+        }
+
         public String getAnswer() {
             return mDataPart[2];
+        }
+
+        public void setAnswer(String answer) {
+            mDataPart[2] = answer;
+        }
+
+        public boolean isSp() {
+            return Integer.valueOf(mDataPart[3]) > 0;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append(getId())
+                    .append(SPLIT_MARK)
+                    .append(getAsk())
+                    .append(SPLIT_MARK)
+                    .append(getAnswer())
+                    .append(SPLIT_MARK)
+                    .append(0);
+            return builder.toString();
         }
     }
 }

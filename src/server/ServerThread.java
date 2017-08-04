@@ -2,6 +2,7 @@ package server;
 
 import com.sun.istack.internal.NotNull;
 import data.Data;
+import data.Process;
 import sun.applet.Main;
 
 import java.io.BufferedReader;
@@ -53,7 +54,7 @@ public class ServerThread implements Runnable {
                     }
                 } else {
                     mTempContent = chatInfo.getContent();
-                    mSocket.getOutputStream().write(getOutput(Data.processData(mTempContent)));
+                    mSocket.getOutputStream().write(getOutput(Process.processData(mTempContent)));
                 }
             }
         } catch (IOException e) {
