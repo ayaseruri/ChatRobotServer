@@ -53,8 +53,7 @@ public class ServerThread implements Runnable {
                         }
                     }
                 } else {
-                    mTempContent = chatInfo.getContent();
-                    mSocket.getOutputStream().write(getOutput(Process.processData(mTempContent)));
+                    mSocket.getOutputStream().write(getOutput(Process.processData(chatInfo)));
                 }
             }
         } catch (IOException e) {

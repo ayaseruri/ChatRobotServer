@@ -33,19 +33,39 @@ public class Data {
         }
     }
 
-    public static synchronized List<String> readAllLines() {
+    public static synchronized List<Line> readAllLines() {
         try {
-            return Files.readAllLines(Paths.get(mDataPath));
+            List<Line> resultLine = new ArrayList<>();
+            for (String line : Files.readAllLines(Paths.get(mDataPath))) {
+                if ("".equals(line)) {
+                    continue;
+                }
+                resultLine.add(new Line(line));
+            }
+            return resultLine;
         } catch (IOException e) {
             e.printStackTrace();
         }
         return new ArrayList<>();
     }
 
-    public static synchronized void write(Line line) {
+    public static synchronized void write(Line line, boolean isAppend) {
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(mDataPath), true));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(mDataPath), isAppend));
             bw.write("\n" + line.toString());
+            bw.flush();
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static synchronized void write(List<Line> lines, boolean isAppend) {
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(new File(mDataPath), isAppend));
+            for (Line line : lines) {
+                bw.write("\n" + line.toString());
+            }
             bw.flush();
             bw.close();
         } catch (IOException e) {
@@ -56,7 +76,7 @@ public class Data {
     static class Line {
 
         private String[] mDataPart = new String[]{
-                UUID.randomUUID().toString(), "", "", "0"
+                UUID.randomUUID().toString(), "", "", "0", "0"
         };
 
         public Line(String mline) {
@@ -69,7 +89,7 @@ public class Data {
         public Line() {
         }
 
-        private String getId() {
+        public String getId() {
             return mDataPart[0];
         }
 
@@ -89,8 +109,22 @@ public class Data {
             mDataPart[2] = answer;
         }
 
-        public boolean isSp() {
-            return Integer.valueOf(mDataPart[3]) > 0;
+        public int getSp() {
+            return Integer.valueOf(mDataPart[3]);
+        }
+
+        public int getVote() {
+            return Integer.valueOf(mDataPart[4]);
+        }
+
+        public void add() {
+            int vote = getVote();
+            mDataPart[4] = String.valueOf(++vote);
+        }
+
+        public void del() {
+            int vote = getVote();
+            mDataPart[4] = String.valueOf(--vote);
         }
 
         @Override
@@ -102,7 +136,9 @@ public class Data {
                     .append(SPLIT_MARK)
                     .append(getAnswer())
                     .append(SPLIT_MARK)
-                    .append(0);
+                    .append(getSp())
+                    .append(SPLIT_MARK)
+                    .append(getVote());
             return builder.toString();
         }
     }

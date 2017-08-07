@@ -4,14 +4,17 @@ package server;
  * Created by wufeiyang on 2017/8/3.
  */
 public class ChatInfo {
-    private String nick;
-    private String content;
+    private String nick = "";
+    private String content = "";
     private long time;
 
-    private long mAnswerId;
+    private String mAnswerId = "";
 
     private boolean isChatRoom;
     private boolean isMine;
+
+    private boolean isDel;
+    private boolean isAdd;
 
     public String getNick() {
         return nick;
@@ -27,14 +30,6 @@ public class ChatInfo {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
     }
 
     public boolean isMine() {
@@ -53,11 +48,43 @@ public class ChatInfo {
         isChatRoom = chatRoom;
     }
 
-    public long getmAnswerId() {
+    public String getmAnswerId() {
         return mAnswerId;
     }
 
-    public void setmAnswerId(long mAnswerId) {
+    public void setmAnswerId(String mAnswerId) {
         this.mAnswerId = mAnswerId;
+    }
+
+    public String getAnswerId() {
+        return mAnswerId;
+    }
+
+    public void setAnswerId(String answerId) {
+        mAnswerId = answerId;
+    }
+
+    public boolean isDel() {
+        return isDel;
+    }
+
+    public void setDel(boolean del) {
+        isDel = del;
+    }
+
+    public boolean isAdd() {
+        return isAdd;
+    }
+
+    public void setAdd(boolean add) {
+        isAdd = add;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }

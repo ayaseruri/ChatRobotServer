@@ -8,14 +8,17 @@ import java.util.HashMap;
 import java.util.List;
 
 import static data.Data.SPLIT_MARK;
+import static data.Data.readAllLines;
 
 /**
  * Created by wufeiyang on 2017/8/4.
  */
 public class Process {
 
-    public static ChatInfo processData(String input) {
+    private static final int VOTE_SOCRE_DIF = 5;
 
+    public static ChatInfo processData(ChatInfo inputChatInfo) {
+        String input = inputChatInfo.getContent();
         ChatInfo chatInfo = new ChatInfo();
         chatInfo.setMine(false);
         chatInfo.setNick("Robot");
@@ -25,32 +28,49 @@ public class Process {
             Data.Line line = new Data.Line();
             line.setAsk(inputArray[0]);
             line.setAnswer(inputArray[1]);
-            Data.write(line);
+            Data.write(line, true);
             chatInfo.setContent("ok, I got it!");
+            return chatInfo;
+        } else if (inputChatInfo.isAdd() || inputChatInfo.isDel()) {
+            List<Data.Line> allLines = readAllLines();
+            for (Data.Line line : allLines) {
+                if (line.getId().equals(inputChatInfo.getmAnswerId())) {
+                    if (inputChatInfo.isAdd()) {
+                        line.add();
+                    } else if (inputChatInfo.isDel()) {
+                        line.del();
+                    }
+                    break;
+                }
+            }
+            Data.write(allLines, false);
             return chatInfo;
         }
 
         Pair<Integer, Data.Line> goodOut = null;
 
-        for (String line : Data.readAllLines()) {
-            Data.Line lineData = new Data.Line(line);
+        for (Data.Line lineData : Data.readAllLines()) {
             String ask = lineData.getAsk();
-            int score = getSimilarScore(input, ask);
-            if (null == goodOut) {
-                goodOut = new Pair<>(score, lineData);
+            if (lineData.getSp() > 0 && input.equals(ask)) {
+                goodOut = new Pair<>(100, lineData);
+                break;
             } else {
-                if (lineData.isSp() && input.equals(lineData.getAsk())) {
+                int score = getSimilarScore(input, ask) + lineData.getVote() * VOTE_SOCRE_DIF;
+                if (null == goodOut) {
                     goodOut = new Pair<>(score, lineData);
-                    break;
-                }
-
-                if (score > goodOut.getKey()) {
+                } else if (score > goodOut.getKey()) {
                     goodOut = new Pair<>(score, lineData);
                 }
             }
         }
 
-        chatInfo.setContent(null == goodOut ? "sorry, i dont know…" : goodOut.getValue().getAnswer());
+        if (null == goodOut) {
+            chatInfo.setContent("sorry, i dont know…");
+        } else {
+            chatInfo.setmAnswerId(goodOut.getValue().getId());
+            chatInfo.setContent(goodOut.getValue().getAnswer());
+        }
+
         return chatInfo;
     }
 
