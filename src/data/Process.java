@@ -1,11 +1,12 @@
 package data;
 
-import javafx.util.Pair;
+import com.sun.tools.javac.util.Pair;
 import server.ChatInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import static data.Data.SPLIT_MARK;
 import static data.Data.readAllLines;
@@ -16,6 +17,7 @@ import static data.Data.readAllLines;
 public class Process {
 
     private static final int VOTE_SOCRE_DIF = 5;
+    private static final int PASS_LINE = 60;
 
     public static ChatInfo processData(ChatInfo inputChatInfo) {
         String input = inputChatInfo.getContent();
@@ -47,28 +49,26 @@ public class Process {
             return chatInfo;
         }
 
-        Pair<Integer, Data.Line> goodOut = null;
+        List<Pair<Integer, Data.Line>> goodOut = new ArrayList<>();
 
         for (Data.Line lineData : Data.readAllLines()) {
             String ask = lineData.getAsk();
             if (lineData.getSp() > 0 && input.equals(ask)) {
-                goodOut = new Pair<>(100, lineData);
-                break;
+                goodOut.add(new Pair<>(100, lineData));
             } else {
                 int score = getSimilarScore(input, ask) + lineData.getVote() * VOTE_SOCRE_DIF;
-                if (null == goodOut) {
-                    goodOut = new Pair<>(score, lineData);
-                } else if (score > goodOut.getKey()) {
-                    goodOut = new Pair<>(score, lineData);
+                if (score > PASS_LINE) {
+                    goodOut.add(new Pair<>(score, lineData));
                 }
             }
         }
 
-        if (null == goodOut) {
+        if (goodOut.size() == 0) {
             chatInfo.setContent("sorry, i dont know…");
         } else {
-            chatInfo.setmAnswerId(goodOut.getValue().getId());
-            chatInfo.setContent(goodOut.getValue().getAnswer());
+            Pair<Integer, Data.Line> result = goodOut.get(new Random().nextInt(goodOut.size()));
+            chatInfo.setmAnswerId(result.snd.getId());
+            chatInfo.setContent(result.snd.getAnswer());
         }
 
         return chatInfo;

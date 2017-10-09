@@ -1,6 +1,5 @@
 package data;
 
-import javafx.util.Pair;
 import server.ChatInfo;
 
 import java.io.*;
