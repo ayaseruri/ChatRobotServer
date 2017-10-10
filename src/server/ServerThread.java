@@ -40,10 +40,16 @@ public class ServerThread implements Runnable {
                         mChatRoomSoceks.add(mSocket);
                     }
 
+                    ChatInfo result = chatInfo;
+                    String content = chatInfo.getContent();
+                    if (content.startsWith("@Robot")) {
+                        result = Process.processData(chatInfo);
+                    }
+
                     for (Socket socket : mChatRoomSoceks) {
                         if (socket != mSocket) {
                             try {
-                                socket.getOutputStream().write(getOutput(chatInfo));
+                                socket.getOutputStream().write(getOutput(result));
                             } catch (IOException e) {
                                 e.printStackTrace();
                                 if (mChatRoomSoceks.contains(socket)) {

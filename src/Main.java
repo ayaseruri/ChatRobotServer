@@ -13,11 +13,15 @@ public class Main {
 
     private static List<Socket> mChatRoomSoceks = new ArrayList<>();
 
-    public static void main(String[] args) throws IOException {
-        ServerSocket ss = new ServerSocket(10012);
-        while (true) {
-            Socket socket = ss.accept();
-            new Thread(new ServerThread(socket, mChatRoomSoceks)).start();
+    public static void main(String[] args) {
+        try {
+            ServerSocket ss = new ServerSocket(10012);
+            while (true) {
+                Socket socket = ss.accept();
+                new Thread(new ServerThread(socket, mChatRoomSoceks)).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

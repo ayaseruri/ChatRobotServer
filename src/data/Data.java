@@ -118,12 +118,12 @@ public class Data {
 
         public void add() {
             int vote = getVote();
-            mDataPart[4] = String.valueOf(++vote);
+            mDataPart[4] = String.valueOf(vote + 1);
         }
 
         public void del() {
             int vote = getVote();
-            mDataPart[4] = String.valueOf(--vote);
+            mDataPart[4] = String.valueOf(vote - 1);
         }
 
         @Override
