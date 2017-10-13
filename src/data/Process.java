@@ -56,17 +56,27 @@ public class Process {
             if (lineData.getSp() > 0 && input.equals(ask)) {
                 goodOut.add(new Pair<>(100, lineData));
             } else {
-                int score = getSimilarScore(input, ask) + lineData.getVote() * VOTE_SOCRE_DIF;
+                // 从这个地方开始修改：首先仅仅计算相似度，如果大于 60 放入 goodout
+                int score = getSimilarScore(input, ask);
                 if (score > PASS_LINE) {
                     goodOut.add(new Pair<>(score, lineData));
                 }
             }
         }
 
-        if (goodOut.size() == 0) {
+        // 这里再进行一次处理，加上 vote：
+        List<Pair<Integer, Data.Line>> goodOutWithVote = new ArrayList<>();
+        for (Pair<Integer, Data.Line> temp : goodOut) {
+            int score = temp.fst + temp.snd.getVote() * VOTE_SOCRE_DIF;
+            if (score > PASS_LINE) {
+                goodOutWithVote.add(temp);
+            }
+        }
+
+        if (goodOutWithVote.size() == 0) {
             chatInfo.setContent("sorry, i dont know…");
         } else {
-            Pair<Integer, Data.Line> result = goodOut.get(new Random().nextInt(goodOut.size()));
+            Pair<Integer, Data.Line> result = goodOutWithVote.get(new Random().nextInt(goodOut.size()));
             chatInfo.setmAnswerId(result.snd.getId());
             chatInfo.setContent(result.snd.getAnswer());
         }
